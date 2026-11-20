@@ -3,108 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>mirrorly test</title>
+<title>mirrorly</title>
 <style>
-*{margin:0;box-sizing:border-box}
-body{background:#1a1a1b;color:#e6e6e6;font-family:-apple-system,sans-serif;height:100vh;display:flex;flex-direction:column}
-#bar{padding:8px 12px;background:#242424;display:flex;align-items:center;gap:8px;flex:0 0 auto}
-#bar input{flex:1;background:#1a1a1b;border:1px solid #3a3a3b;border-radius:999px;padding:8px 16px;color:#e6e6e6;font-size:14px;outline:none}
-#bar input:focus{border-color:#8ab4f8}
-#bar button{background:#333;border:0;color:#e6e6e6;padding:8px 16px;border-radius:999px;cursor:pointer;font-size:13px}
-#bar button:hover{background:#444}
-#status{padding:4px 12px;font-size:12px;color:#9b9b9d;background:#1a1a1b;flex:0 0 auto}
-#status.ok{color:#3ddc84}
-#status.err{color:#ff6b6b}
-iframe{flex:1;border:0;background:#fff}
-#empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#6c6c6e}
-#empty .big{font-size:44px}
-.tests{display:flex;gap:8px;padding:8px 12px;background:#242424;flex-wrap:wrap;flex:0 0 auto}
-.tests button{background:#2e2e2f;border:1px solid #3a3a3b;color:#c9c9cb;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px}
-.tests button:hover{background:#3a3a3b}
-.tests button.active{border-color:#8ab4f8;color:#8ab4f8}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#1a1a1b}
+iframe{width:100%;height:100%;border:0;display:block}
 </style>
 </head>
 <body>
-
-<div id="bar">
-  <input id="url" type="text" placeholder="https://www.mirrorly.workers.dev/browser/" value="https://www.mirrorly.workers.dev/browser/">
-  <button onclick="go()">Открыть</button>
-  <button onclick="testRaw()">Тест fetch</button>
-</div>
-
-<div class="tests">
-  <button onclick="setUrl('https://www.mirrorly.workers.dev/browser/')">www /browser/</button>
-  <button onclick="setUrl('https://www.mirrorly.workers.dev/')">www /</button>
-  <button onclick="setUrl('https://internal.mirrorly.workers.dev/browser/page/https%3A%2F%2Fexample.com')">internal proxy</button>
-  <button onclick="setUrl('https://www.mirrorly.workers.dev/browser/tls?host=example.com')">TLS check</button>
-</div>
-
-<div id="status">Готово. Нажмите «Открыть» или выберите тест.</div>
-
-<iframe id="frame" style="display:none"></iframe>
-<div id="empty">
-  <div class="big">🌐</div>
-  <div>GitHub Pages тест доступности mirrorly</div>
-  <div style="font-size:12px">Если iframe зависает на загрузке — Cloudflare троттлит ваш IP</div>
-</div>
-
-<script>
-var frame=document.getElementById('frame');
-var empty=document.getElementById('empty');
-var status=document.getElementById('status');
-var urlInput=document.getElementById('url');
-
-function setUrl(u){urlInput.value=u}
-
-function go(){
-  var u=urlInput.value.trim();
-  if(!u)return;
-  status.textContent='Загрузка '+u+' ...';
-  status.className='';
-  empty.style.display='none';
-  frame.style.display='block';
-  frame.src=u;
-  frame.onload=function(){
-    status.textContent='iframe загрузился (HTTP ответ получен). URL: '+u;
-    status.className='ok';
-  };
-  frame.onerror=function(){
-    status.textContent='iframe ошибка. Возможно блокировка по IP/SNI.';
-    status.className='err';
-  };
-  // таймаут — если за 15 сек не загрузился, скорее всего троттлинг
-  clearTimeout(window._to);
-  window._to=setTimeout(function(){
-    if(status.className!=='ok'){
-      status.textContent='⚠ 15 секунд без ответа — вероятно Cloudflare троттлит соединение (16KB limit)';
-      status.className='err';
-    }
-  },15000);
-}
-
-async function testRaw(){
-  var u=urlInput.value.trim()||'https://www.mirrorly.workers.dev/';
-  status.textContent='fetch '+u+' ...';
-  status.className='';
-  var t0=Date.now();
-  try{
-    // no-cors: мы не прочитаем тело, но узнаем долетел ли запрос вообще
-    var r=await fetch(u,{mode:'no-cors',cache:'no-store'});
-    var ms=Date.now()-t0;
-    status.textContent='fetch завершён за '+ms+'мс (opaque response — тело недоступно из-за CORS, но соединение установлено)';
-    status.className='ok';
-  }catch(e){
-    var ms=Date.now()-t0;
-    status.textContent='fetch ошибка за '+ms+'мс: '+e.message+' — соединение не установлено';
-    status.className='err';
-  }
-}
-
-// авто-тест при загрузке
-window.addEventListener('load',function(){
-  status.textContent='Страница загружена с GitHub Pages. Нажмите кнопки для тестов.';
-});
-</script>
-
+<iframe src="https://www.mirrorly.workers.dev/browser/" allow="geolocation 'none'; camera 'none'; microphone 'none'" referrerpolicy="no-referrer"></iframe>
 </body>
 </html>
